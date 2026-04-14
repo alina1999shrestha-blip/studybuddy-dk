@@ -143,22 +143,35 @@ python -m mlflow ui --backend-store-uri mlflow_tracking
 
 ## 📁 Project Structure
 
-![Project Structure](project_structure.png)
-
-| Folder / File | Purpose |
-|---|---|
-| `agents/` | 3 pipeline agents — matching, gaps, monitoring |
-| `data/static/` | 17 programs + 12 courses JSON files |
-| `.github/workflows/` | GitHub Actions daily exchange rate fetch |
-| `pipeline.py` | Connects all 3 agents end to end |
-| `api.py` | FastAPI REST backend |
-| `app_final.py` | Streamlit interactive dashboard |
-| `database.py` | SQLite database setup |
-| `mlflow_tracker.py` | MLflow experiment logging |
-| `Dockerfile` | Container definition |
-| `docker-compose.yml` | One command deployment |
-| `requirements.txt` | Python dependencies |
-| `.env` | API keys — never committed to GitHub |
+```
+studybuddy-dk/
+│
+├── agents/                              ← Pipeline agents
+│   ├── agent1_profile_matching.py       ← Profile building + cosine similarity matching
+│   ├── agent2_gap_preparation.py        ← Gap analysis + costs + deadlines
+│   └── agent3_monitoring.py             ← Exchange rate drift + CBS monitoring
+│
+├── data/static/                         ← Static datasets
+│   ├── programs.json                    ← 17 Danish master programs
+│   └── courses.json                     ← 12 gap-filling courses
+│
+├── .github/workflows/                   ← CI/CD
+│   └── daily_rates.yml                  ← GitHub Actions — daily exchange rates
+│
+├── pipeline.py                          ← Connects all 3 agents end to end
+├── api.py                               ← FastAPI REST backend
+├── app_final.py                         ← Streamlit interactive dashboard
+├── database.py                          ← SQLite database setup
+├── load_data.py                         ← Data loader + validation
+├── mlflow_tracker.py                    ← MLflow experiment tracking
+│
+├── Dockerfile                           ← Container definition
+├── docker-compose.yml                   ← One command deployment
+├── requirements.txt                     ← Python dependencies
+├── README.md                            ← Project documentation
+├── .env                                 ← API keys (never committed)
+└── .gitignore                           ← Files excluded from GitHub
+```
 
 ---
 
