@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  api:
+    build: .
+    container_name: studybuddy-api
+    ports:
+      - "8000:8000"
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    volumes:
+      - .:/app
+    command: python api.py
+
+  frontend:
+    build: .
+    container_name: studybuddy-frontend
+    ports:
+      - "8501:8501"
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - API_URL=http://api:8000
+    volumes:
+      - .:/app
+    depends_on:
+      - api
+    command: streamlit run app_final.py --server.address=0.0.0.0
