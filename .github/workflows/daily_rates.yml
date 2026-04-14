@@ -1,0 +1,69 @@
+name: Daily Exchange Rates
+
+on:
+  schedule:
+    - cron: '0 8 * * *'  # runs every day at 08:00 UTC
+  workflow_dispatch:       # allows manual trigger from GitHub
+
+jobs:
+  fetch-rates:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install requests python-dotenv
+
+      - name: Fetch and save exchange rates
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          python -c "
+          import requests, sqlite3, json
+          from datetime import datetime
+
+          r1 = requests.get('https://api.frankfurter.app/latest?from=DKK&to=INR,USD,EUR,GBP').json()
+          r2 = requests.get('https://open.er-api.com/v6/latest/DKK').json()
+          r3 = requests.get('https://open.er-api.com/v6/latest/EUR').json()
+
+          conn = sqlite3.connect('studybuddy.db')
+          cursor = conn.cursor()
+          cursor.execute('''
+              CREATE TABLE IF NOT EXISTS exchange_rates (
+                  id INTEGER PRIMARY KEY AUTOINCREMENT,
+                  date TEXT, dkk_to_inr REAL, dkk_to_npr REAL,
+                  dkk_to_usd REAL, dkk_to_eur REAL, dkk_to_gbp REAL,
+                  eur_to_npr REAL, fetched_at TEXT
+              )
+          ''')
+          cursor.execute('''
+              INSERT INTO exchange_rates
+              (date, dkk_to_inr, dkk_to_npr, dkk_to_usd, dkk_to_eur, dkk_to_gbp, eur_to_npr, fetched_at)
+              VALUES (?,?,?,?,?,?,?,?)
+          ''', (
+              r1['date'],
+              r1['rates']['INR'], r2['rates']['NPR'],
+              r1['rates']['USD'], r1['rates']['EUR'],
+              r1['rates']['GBP'], r3['rates']['NPR'],
+              datetime.utcnow().isoformat()
+          ))
+          conn.commit()
+          conn.close()
+          print('Exchange rates saved:', r1['date'])
+          "
+
+      - name: Commit updated database
+        run: |
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "GitHub Actions"
+          git add studybuddy.db
+          git diff --staged --quiet || git commit -m "Auto: daily exchange rates update"
+          git push
