@@ -5,7 +5,8 @@ from datetime import datetime
 
 # Set MLflow tracking location — saves inside your project folder
 MLFLOW_DIR = os.path.join(os.getcwd(), "mlflow_tracking")
-mlflow.set_tracking_uri(f"file:///{MLFLOW_DIR}")
+os.makedirs(MLFLOW_DIR, exist_ok=True)
+mlflow.set_tracking_uri(MLFLOW_DIR)
 mlflow.set_experiment("studybuddy_dk")
 
 
