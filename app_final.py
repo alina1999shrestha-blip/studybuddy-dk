@@ -10,6 +10,7 @@ from datetime import datetime
 import dotenv; dotenv.load_dotenv(encoding='utf-8-sig')
 
 # ── Try to import pipeline directly (works on Streamlit Cloud) ──
+PIPELINE_ERROR = None
 try:
     import sys
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -23,6 +24,7 @@ try:
     PIPELINE_DIRECT = True
 except Exception as e:
     PIPELINE_DIRECT = False
+    PIPELINE_ERROR = str(e)
 
 # ===== PAGE CONFIG =====
 st.set_page_config(
@@ -415,7 +417,10 @@ SUBJECT_HINTS = {
 if page == "🔍 Program Finder":
 
     if not api_ok():
-        st.error("⚠️ API offline — run `python api.py` first, then refresh.")
+        if PIPELINE_ERROR:
+            st.error(f"⚠️ Pipeline import failed: {PIPELINE_ERROR}")
+        else:
+            st.error("⚠️ API offline — run `python api.py` first, then refresh.")
         st.stop()
 
     st.markdown("#### Step 1 — Personal Information")
