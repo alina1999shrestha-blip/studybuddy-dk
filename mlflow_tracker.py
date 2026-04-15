@@ -3,10 +3,9 @@ import json
 import os
 from datetime import datetime
 
-# Set MLflow tracking location — saves inside your project folder
-MLFLOW_DIR = os.path.join(os.getcwd(), "mlflow_tracking")
-os.makedirs(MLFLOW_DIR, exist_ok=True)
-mlflow.set_tracking_uri(MLFLOW_DIR)
+# Set MLflow tracking location — SQLite backend works on Windows, Streamlit Cloud and Docker
+os.makedirs("mlflow_tracking", exist_ok=True)
+mlflow.set_tracking_uri("sqlite:///mlflow_tracking/mlflow.db")
 mlflow.set_experiment("studybuddy_dk")
 
 
@@ -91,7 +90,7 @@ def log_pipeline_run_mlflow(student_input: dict, results: dict):
         print(f"   Top match:  {top['program_name']} ({top['match_score']}%)")
         print(f"   Gaps:       {len(results['gaps'])}")
         print(f"   Artifacts:  5 files saved")
-        print(f"   View UI:    mlflow ui --backend-store-uri mlflow_tracking")
+        print(f"   View UI:    mlflow ui --backend-store-uri sqlite:///mlflow_tracking/mlflow.db")
 
 
 def log_monitoring_run_mlflow(monitoring_result: dict):
