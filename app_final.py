@@ -7,6 +7,22 @@ import requests
 import pandas as pd
 import os
 from datetime import datetime
+import dotenv; dotenv.load_dotenv(encoding='utf-8-sig')
+
+# ── Try to import pipeline directly (works on Streamlit Cloud) ──
+try:
+    import sys
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from pipeline import run_pipeline
+    from database import init_database, load_programs_to_db, load_courses_to_db, get_connection
+    # Initialise database on startup
+    if not os.path.exists("studybuddy.db"):
+        init_database()
+        load_programs_to_db()
+        load_courses_to_db()
+    PIPELINE_DIRECT = True
+except Exception as e:
+    PIPELINE_DIRECT = False
 
 # ===== PAGE CONFIG =====
 st.set_page_config(
@@ -17,6 +33,14 @@ st.set_page_config(
 )
 
 API_URL = os.getenv("API_URL", "http://127.0.0.1:8000")
+
+def api_ok():
+    if PIPELINE_DIRECT:
+        return True
+    try:
+        return requests.get(f"{API_URL}/health", timeout=4).status_code == 200
+    except:
+        return False
 
 # ===== CUSTOM CSS =====
 st.markdown("""
@@ -71,29 +95,34 @@ html, body, [class*="css"] {
     letter-spacing: 6px;
 }
 
-/* ── CARDS ── */
+/* ══════════════════════════════════════════
+   TAB 1 — TOP MATCHES  (Navy Blue theme)
+══════════════════════════════════════════ */
 .program-card {
     background: white;
-    border: 1px solid #e8edf5;
+    border: 2px solid #e8edf5;
+    border-top: 4px solid #0f2352;
     border-radius: 16px;
     padding: 1.5rem;
     margin-bottom: 1rem;
     position: relative;
-    transition: box-shadow 0.2s;
+    transition: all 0.2s;
     box-shadow: 0 2px 8px rgba(15,35,82,0.06);
 }
 .program-card:hover {
-    box-shadow: 0 8px 24px rgba(15,35,82,0.12);
+    box-shadow: 0 8px 24px rgba(15,35,82,0.15);
+    transform: translateY(-2px);
 }
 .rank-badge {
     position: absolute;
     top: 1.2rem; right: 1.2rem;
-    background: #0f2352;
+    background: linear-gradient(135deg, #0f2352, #2563eb);
     color: white;
     border-radius: 50%;
-    width: 36px; height: 36px;
+    width: 38px; height: 38px;
     display: flex; align-items: center; justify-content: center;
     font-weight: 700; font-size: 0.9rem;
+    box-shadow: 0 4px 12px rgba(15,35,82,0.3);
 }
 .program-name {
     font-size: 1.15rem;
@@ -106,208 +135,205 @@ html, body, [class*="css"] {
     font-size: 0.9rem;
     margin: 0 0 1rem 0;
 }
-
-/* ── SCORE BAR ── */
 .score-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 0.75rem;
+    display: flex; align-items: center; gap: 12px; margin-bottom: 0.75rem;
 }
 .score-label {
-    font-size: 0.85rem;
-    color: #6b7a99;
-    width: 80px;
-    flex-shrink: 0;
+    font-size: 0.85rem; color: #6b7a99; width: 80px; flex-shrink: 0;
 }
 .score-bar-bg {
-    flex: 1;
-    background: #f0f3fa;
-    border-radius: 99px;
-    height: 10px;
-    overflow: hidden;
+    flex: 1; background: #eef2ff; border-radius: 99px; height: 12px; overflow: hidden;
 }
 .score-bar-fill {
-    height: 100%;
-    border-radius: 99px;
-    transition: width 0.6s ease;
+    height: 100%; border-radius: 99px; transition: width 0.8s ease;
 }
 .score-value {
-    font-weight: 700;
-    font-size: 0.9rem;
-    width: 45px;
-    text-align: right;
-    flex-shrink: 0;
+    font-weight: 700; font-size: 0.9rem; width: 45px; text-align: right; flex-shrink: 0;
 }
-
-/* ── ELIGIBILITY PILL ── */
 .pill-eligible {
     display: inline-block;
-    background: #e8f5e9;
-    color: #2e7d32;
-    border: 1px solid #a5d6a7;
-    border-radius: 99px;
-    padding: 0.25rem 0.9rem;
-    font-size: 0.8rem;
-    font-weight: 600;
+    background: linear-gradient(135deg, #dcfce7, #bbf7d0);
+    color: #166534;
+    border: 1px solid #86efac;
+    border-radius: 99px; padding: 0.3rem 1rem;
+    font-size: 0.8rem; font-weight: 700;
 }
 .pill-gaps {
     display: inline-block;
-    background: #fff8e1;
-    color: #f57f17;
-    border: 1px solid #ffe082;
-    border-radius: 99px;
-    padding: 0.25rem 0.9rem;
-    font-size: 0.8rem;
-    font-weight: 600;
+    background: linear-gradient(135deg, #fff7ed, #fed7aa);
+    color: #9a3412;
+    border: 1px solid #fdba74;
+    border-radius: 99px; padding: 0.3rem 1rem;
+    font-size: 0.8rem; font-weight: 700;
 }
-
-/* ── GAP CARD ── */
-.gap-card {
-    background: #fffbf0;
-    border-left: 4px solid #f59e0b;
-    border-radius: 0 12px 12px 0;
-    padding: 1.2rem 1.5rem;
-    margin-bottom: 0.8rem;
-}
-.gap-card .gap-title {
-    font-weight: 700;
-    color: #92400e;
-    font-size: 1rem;
-    margin-bottom: 0.3rem;
-}
-.gap-card .gap-sub {
-    color: #78716c;
-    font-size: 0.85rem;
-}
-
-/* ── COST CARD ── */
-.cost-card {
-    background: linear-gradient(135deg, #0f2352, #1a3a7a);
-    color: white;
-    border-radius: 16px;
-    padding: 1.5rem;
-    text-align: center;
-}
-.cost-card .currency {
-    font-size: 0.8rem;
-    opacity: 0.7;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 0.25rem;
-}
-.cost-card .amount {
-    font-size: 1.8rem;
-    font-weight: 700;
-    font-family: 'DM Serif Display', serif;
-}
-.cost-card .per-year {
-    font-size: 0.75rem;
-    opacity: 0.6;
-    margin-top: 0.2rem;
-}
-
-/* ── DEADLINE ── */
-.deadline-urgent {
-    background: #fef2f2;
-    border: 1px solid #fca5a5;
-    border-radius: 12px;
-    padding: 1rem 1.2rem;
-    margin-bottom: 0.6rem;
-}
-.deadline-ok {
-    background: #f0fdf4;
-    border: 1px solid #86efac;
-    border-radius: 12px;
-    padding: 1rem 1.2rem;
-    margin-bottom: 0.6rem;
-}
-.deadline-name {
-    font-weight: 600;
-    font-size: 0.95rem;
-    margin-bottom: 0.2rem;
-}
-.deadline-days {
-    font-size: 1.4rem;
-    font-weight: 700;
-}
-
-/* ── READINESS SCORE ── */
 .readiness-circle {
     background: linear-gradient(135deg, #0f2352, #2563eb);
     border-radius: 50%;
-    width: 120px; height: 120px;
+    width: 130px; height: 130px;
     display: flex; flex-direction: column;
     align-items: center; justify-content: center;
-    color: white;
-    margin: 0 auto 1rem;
-    box-shadow: 0 8px 24px rgba(15,35,82,0.3);
+    color: white; margin: 0 auto 1rem;
+    box-shadow: 0 8px 32px rgba(15,35,82,0.35);
 }
-.readiness-circle .pct {
-    font-size: 2rem;
-    font-weight: 700;
-    line-height: 1;
-}
-.readiness-circle .label {
-    font-size: 0.65rem;
-    opacity: 0.75;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-}
+.readiness-circle .pct { font-size: 2.2rem; font-weight: 700; line-height: 1; }
+.readiness-circle .label { font-size: 0.6rem; opacity: 0.8; letter-spacing: 2px; text-transform: uppercase; margin-top: 2px; }
 
-/* ── STAT BOX ── */
+/* ══════════════════════════════════════════
+   TAB 2 — GAP ANALYSIS  (Amber/Orange theme)
+══════════════════════════════════════════ */
+.gap-section-header {
+    background: linear-gradient(135deg, #78350f, #b45309);
+    color: white; border-radius: 12px;
+    padding: 1rem 1.5rem; margin-bottom: 1.5rem;
+    font-size: 1rem; font-weight: 600;
+}
+.gap-card {
+    background: linear-gradient(135deg, #fffbeb, #fef3c7);
+    border-left: 5px solid #f59e0b;
+    border-radius: 0 14px 14px 0;
+    padding: 1.2rem 1.5rem; margin-bottom: 1rem;
+    box-shadow: 0 2px 8px rgba(245,158,11,0.12);
+}
+.gap-card .gap-title {
+    font-weight: 700; color: #78350f; font-size: 1.05rem; margin-bottom: 0.3rem;
+}
+.gap-card .gap-sub { color: #92400e; font-size: 0.88rem; }
+.course-chip {
+    display: inline-block;
+    background: linear-gradient(135deg, #fffbeb, #fef9c3);
+    border: 1px solid #fde68a;
+    border-radius: 10px; padding: 0.5rem 1rem;
+    font-size: 0.82rem; margin: 0.3rem 0.3rem 0 0; color: #78350f;
+    box-shadow: 0 1px 4px rgba(245,158,11,0.1);
+}
+.course-chip .free-tag { color: #059669; font-weight: 700; }
+
+/* ══════════════════════════════════════════
+   TAB 3 — COSTS  (Green theme)
+══════════════════════════════════════════ */
+.cost-card {
+    border-radius: 18px; padding: 1.8rem 1.5rem; text-align: center; color: white;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+}
+.cost-card-dkk  { background: linear-gradient(135deg, #065f46, #059669); }
+.cost-card-npr  { background: linear-gradient(135deg, #1e3a5f, #2563eb); }
+.cost-card-inr  { background: linear-gradient(135deg, #4c1d95, #7c3aed); }
+.cost-card-usd  { background: linear-gradient(135deg, #78350f, #d97706); }
+.cost-card .currency {
+    font-size: 0.75rem; opacity: 0.85; text-transform: uppercase;
+    letter-spacing: 2px; margin-bottom: 0.4rem;
+}
+.cost-card .amount {
+    font-size: 2rem; font-weight: 700; font-family: 'DM Serif Display', serif;
+}
+.cost-card .per-year { font-size: 0.75rem; opacity: 0.65; margin-top: 0.3rem; }
+
+/* ══════════════════════════════════════════
+   TAB 4 — DEADLINES  (Purple theme)
+══════════════════════════════════════════ */
+.deadline-urgent {
+    background: linear-gradient(135deg, #fff1f2, #ffe4e6);
+    border: 2px solid #fca5a5; border-left: 5px solid #ef4444;
+    border-radius: 14px; padding: 1.2rem 1.5rem; margin-bottom: 0.8rem;
+    box-shadow: 0 2px 8px rgba(239,68,68,0.1);
+}
+.deadline-ok {
+    background: linear-gradient(135deg, #faf5ff, #ede9fe);
+    border: 2px solid #c4b5fd; border-left: 5px solid #7c3aed;
+    border-radius: 14px; padding: 1.2rem 1.5rem; margin-bottom: 0.8rem;
+    box-shadow: 0 2px 8px rgba(124,58,237,0.08);
+}
+.deadline-name { font-weight: 700; font-size: 0.95rem; margin-bottom: 0.4rem; color: #4c1d95; }
+.deadline-days { font-size: 2rem; font-weight: 700; color: #7c3aed; font-family: 'DM Serif Display', serif; }
+
+/* ══════════════════════════════════════════
+   TAB 5 — MONITORING  (Teal theme)
+══════════════════════════════════════════ */
+.alert-high {
+    background: linear-gradient(135deg, #fff1f2, #fee2e2);
+    border-left: 5px solid #ef4444;
+    border-radius: 0 12px 12px 0; padding: 1rem 1.2rem; margin-bottom: 0.6rem;
+    color: #991b1b; font-size: 0.9rem;
+    box-shadow: 0 2px 8px rgba(239,68,68,0.1);
+}
+.alert-medium {
+    background: linear-gradient(135deg, #fffbeb, #fef3c7);
+    border-left: 5px solid #f59e0b;
+    border-radius: 0 12px 12px 0; padding: 1rem 1.2rem; margin-bottom: 0.6rem;
+    color: #92400e; font-size: 0.9rem;
+    box-shadow: 0 2px 8px rgba(245,158,11,0.1);
+}
+.alert-ok {
+    background: linear-gradient(135deg, #f0fdfa, #ccfbf1);
+    border-left: 5px solid #14b8a6;
+    border-radius: 0 12px 12px 0; padding: 1rem 1.2rem; margin-bottom: 0.6rem;
+    color: #134e4a; font-size: 0.9rem;
+    box-shadow: 0 2px 8px rgba(20,184,166,0.1);
+}
+.monitor-stat {
+    background: linear-gradient(135deg, #f0fdfa, #ccfbf1);
+    border: 2px solid #99f6e4; border-radius: 16px;
+    padding: 1.5rem; text-align: center;
+    box-shadow: 0 4px 12px rgba(20,184,166,0.1);
+}
+.monitor-stat .stat-val { font-size: 2rem; font-weight: 700; color: #0f766e; font-family: 'DM Serif Display', serif; }
+.monitor-stat .stat-lbl { font-size: 0.8rem; color: #5eead4; margin-top: 0.2rem; text-transform: uppercase; letter-spacing: 1px; }
+
+/* ══════════════════════════════════════════
+   SHARED STAT BOX
+══════════════════════════════════════════ */
 .stat-box {
-    background: white;
-    border: 1px solid #e8edf5;
-    border-radius: 12px;
-    padding: 1.2rem;
-    text-align: center;
+    background: white; border: 1px solid #e8edf5;
+    border-radius: 12px; padding: 1.2rem; text-align: center;
     box-shadow: 0 2px 8px rgba(15,35,82,0.05);
 }
 .stat-box .stat-value {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #0f2352;
+    font-size: 2rem; font-weight: 700; color: #0f2352;
     font-family: 'DM Serif Display', serif;
 }
-.stat-box .stat-label {
-    font-size: 0.8rem;
-    color: #6b7a99;
-    margin-top: 0.2rem;
-}
+.stat-box .stat-label { font-size: 0.8rem; color: #6b7a99; margin-top: 0.2rem; }
 
-/* ── COURSE CHIP ── */
-.course-chip {
-    display: inline-block;
-    background: #f0f3fa;
-    border: 1px solid #d0d8ee;
-    border-radius: 8px;
-    padding: 0.4rem 0.8rem;
-    font-size: 0.82rem;
-    margin: 0.25rem 0.25rem 0 0;
-    color: #374151;
+/* ══════════════════════════════════════════
+   PREPARATION GUIDE  (Creative timeline)
+══════════════════════════════════════════ */
+.timeline-wrap { position: relative; padding-left: 2rem; }
+.timeline-wrap::before {
+    content: '';
+    position: absolute; left: 12px; top: 0; bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, #0f2352, #7c3aed, #059669, #d97706);
+    border-radius: 99px;
 }
-.course-chip .free-tag {
-    color: #059669;
-    font-weight: 600;
+.tl-item {
+    position: relative; margin-bottom: 1.5rem;
+    padding: 1.5rem 1.5rem 1.5rem 2rem;
+    border-radius: 16px; color: white;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.12);
 }
-
-/* ── ALERT ── */
-.alert-high {
-    background: #fef2f2; border-left: 4px solid #ef4444;
-    border-radius: 0 8px 8px 0; padding: 0.8rem 1rem; margin-bottom: 0.5rem;
-    color: #991b1b; font-size: 0.9rem;
+.tl-item::before {
+    content: '';
+    position: absolute; left: -2.5rem; top: 1.5rem;
+    width: 16px; height: 16px;
+    border-radius: 50%; border: 3px solid white;
+    box-shadow: 0 0 0 3px currentColor;
 }
-.alert-medium {
-    background: #fffbeb; border-left: 4px solid #f59e0b;
-    border-radius: 0 8px 8px 0; padding: 0.8rem 1rem; margin-bottom: 0.5rem;
-    color: #92400e; font-size: 0.9rem;
+.tl-foundation { background: linear-gradient(135deg, #0f2352, #1d4ed8); }
+.tl-foundation::before { color: #1d4ed8; }
+.tl-skills     { background: linear-gradient(135deg, #4c1d95, #7c3aed); }
+.tl-skills::before { color: #7c3aed; }
+.tl-advanced   { background: linear-gradient(135deg, #065f46, #059669); }
+.tl-advanced::before { color: #059669; }
+.tl-apply      { background: linear-gradient(135deg, #78350f, #d97706); }
+.tl-apply::before { color: #d97706; }
+.tl-period { font-size: 0.75rem; opacity: 0.8; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 0.3rem; }
+.tl-title  { font-size: 1.2rem; font-weight: 700; margin-bottom: 1rem; font-family: 'DM Serif Display', serif; }
+.tl-task {
+    background: rgba(255,255,255,0.15);
+    border-radius: 8px; padding: 0.5rem 0.8rem;
+    margin-bottom: 0.4rem; font-size: 0.88rem;
+    display: flex; align-items: center; gap: 0.5rem;
 }
-.alert-ok {
-    background: #f0fdf4; border-left: 4px solid #22c55e;
-    border-radius: 0 8px 8px 0; padding: 0.8rem 1rem; margin-bottom: 0.5rem;
-    color: #166534; font-size: 0.9rem;
-}
+.tl-task::before { content: '✓'; font-weight: 700; opacity: 0.9; }
 
 /* ── SIDEBAR ── */
 [data-testid="stSidebar"] {
@@ -616,15 +642,34 @@ Respond ONLY with valid JSON, no explanation, no markdown:
                         "ects_research": float(ects_r),
                         "ielts": float(ielts),
                         "country": country,
-                        "eu_student": eu_flag
+                        "eu_student": eu_flag,
+                        "known_skills": []
                     }
-                    resp = requests.post(f"{API_URL}/analyse", json=payload, timeout=30)
 
-                    if resp.status_code != 200:
-                        st.error(f"API error {resp.status_code}: {resp.text}")
-                        st.stop()
+                    # ── Run pipeline directly or via API ──
+                    if PIPELINE_DIRECT:
+                        raw = run_pipeline(payload)
+                        top3    = raw.get("top3_matches", [])
+                        monitor = raw.get("monitoring", {})
+                        alerts  = monitor.get("alerts", []) if isinstance(monitor, dict) else []
+                        result = {
+                            "student_name":    raw.get("student_name"),
+                            "top_programs":    top3,
+                            "gaps":            raw.get("gaps", []),
+                            "recommendations": raw.get("recommendations", []),
+                            "costs":           raw.get("costs", {}),
+                            "deadlines":       raw.get("deadlines", []),
+                            "monitoring_alerts": alerts,
+                            "runtime_seconds": float(raw.get("run_duration_s", 0)),
+                            "timestamp":       datetime.now().isoformat()
+                        }
+                    else:
+                        resp = requests.post(f"{API_URL}/analyse", json=payload, timeout=30)
+                        if resp.status_code != 200:
+                            st.error(f"API error {resp.status_code}: {resp.text}")
+                            st.stop()
+                        result = resp.json()
 
-                    result = resp.json()
                     st.success("✅ Analysis complete!")
 
                     # ── NORMALISE KEYS from pipeline ──
@@ -777,15 +822,15 @@ Respond ONLY with valid JSON, no explanation, no markdown:
                             date = costs.get("rate_date", costs.get("exchange_rate_date", "today"))
 
                             cc1, cc2, cc3, cc4 = st.columns(4)
-                            for col, currency, amount, flag in [
-                                (cc1,"DKK / Year", f"{int(dkk):,}","🇩🇰"),
-                                (cc2,"NPR / Year",  f"{int(npr):,}","🇳🇵"),
-                                (cc3,"INR / Year",  f"{int(inr):,}","🇮🇳"),
-                                (cc4,"USD / Year",  f"{int(usd):,}","🇺🇸"),
+                            for col, currency, amount, flag, cls in [
+                                (cc1,"DKK / Year", f"{int(dkk):,}","🇩🇰","cost-card cost-card-dkk"),
+                                (cc2,"NPR / Year",  f"{int(npr):,}","🇳🇵","cost-card cost-card-npr"),
+                                (cc3,"INR / Year",  f"{int(inr):,}","🇮🇳","cost-card cost-card-inr"),
+                                (cc4,"USD / Year",  f"{int(usd):,}","🇺🇸","cost-card cost-card-usd"),
                             ]:
                                 with col:
                                     st.markdown(f"""
-                                    <div class="cost-card">
+                                    <div class="{cls}">
                                         <div class="currency">{flag} {currency}</div>
                                         <div class="amount">{amount}</div>
                                         <div class="per-year">Tuition only</div>
@@ -831,13 +876,13 @@ Respond ONLY with valid JSON, no explanation, no markdown:
 
                         m1, m2 = st.columns(2)
                         with m1:
-                            st.markdown(f"""<div class="stat-box">
-                                <div class="stat-value">{runtime:.2f}s</div>
-                                <div class="stat-label">Pipeline Runtime</div></div>""", unsafe_allow_html=True)
+                            st.markdown(f"""<div class="monitor-stat">
+                                <div class="stat-val">{runtime:.2f}s</div>
+                                <div class="stat-lbl">Pipeline Runtime</div></div>""", unsafe_allow_html=True)
                         with m2:
-                            st.markdown(f"""<div class="stat-box">
-                                <div class="stat-value">{ts}</div>
-                                <div class="stat-label">Run Date</div></div>""", unsafe_allow_html=True)
+                            st.markdown(f"""<div class="monitor-stat">
+                                <div class="stat-val">{ts}</div>
+                                <div class="stat-lbl">Run Date</div></div>""", unsafe_allow_html=True)
 
                         st.markdown("<br>**Monitoring Alerts**", unsafe_allow_html=True)
                         if not alerts:
@@ -860,9 +905,16 @@ Respond ONLY with valid JSON, no explanation, no markdown:
 elif page == "📊 Program Explorer":
     st.markdown("## All 17 Danish Programs")
     try:
-        resp = requests.get(f"{API_URL}/programs", timeout=10)
-        if resp.status_code == 200:
-            programs = resp.json().get("programs", [])
+        if PIPELINE_DIRECT:
+            conn = get_connection()
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM programs")
+            columns = [d[0] for d in cursor.description]
+            programs = [dict(zip(columns, row)) for row in cursor.fetchall()]
+            conn.close()
+        else:
+            resp = requests.get(f"{API_URL}/programs", timeout=10)
+            programs = resp.json().get("programs", []) if resp.status_code == 200 else []
             if programs:
                 df = pd.DataFrame(programs)
                 unis = st.multiselect("Filter by University", df["university"].unique().tolist(),
@@ -879,52 +931,92 @@ elif page == "📊 Program Explorer":
 
 # ===== PAGE 3: PREPARATION GUIDE =====
 elif page == "📖 Preparation Guide":
-    st.markdown("## Your Preparation Roadmap")
-    st.markdown("Follow this timeline to be fully ready for your Danish master's application.")
+    st.markdown("## 🗺️ Your Journey to Denmark")
+    st.markdown("A personalised roadmap to get you fully ready for your Danish master's application.")
 
-    phases = [
-        ("Month 0–1", "Foundation", [
-            "Take practice IELTS tests to identify weak areas",
-            "Enroll in foundational courses (Python, Statistics)",
-            "Review target program syllabi and requirements",
-            "Create a detailed weekly study schedule",
-        ], "#0f2352"),
-        ("Month 1–3", "Skill Building", [
-            "Focus on IELTS writing and speaking",
-            "Complete core courses — Python, SQL, ML basics",
-            "Practice with real datasets and build small projects",
-            "Retake IELTS if needed (target: 6.5+)",
-        ], "#1a3a7a"),
-        ("Month 3–6", "Advanced Topics", [
-            "Deepen knowledge in specialised areas",
-            "Complete a capstone project or case study",
-            "Join study groups or online communities",
-            "Prepare application documents and personal statement",
-        ], "#2563eb"),
-        ("Month 6+", "Application", [
-            "Submit completed applications before deadline",
-            "Prepare for potential interviews",
-            "Strengthen answers with real examples from projects",
-            "Stay updated on admissions decisions",
-        ], "#16a34a"),
-    ]
+    st.markdown("""
+    <div class="timeline-wrap">
 
-    for period, title, tasks, color in phases:
-        with st.expander(f"📅 {period} — {title}", expanded=(period == "Month 0–1")):
-            for t in tasks:
-                st.markdown(f"- ✔️ {t}")
+      <div class="tl-item tl-foundation">
+        <div class="tl-period">Month 0 – 1</div>
+        <div class="tl-title">🏗️ Foundation Building</div>
+        <div class="tl-task">Take practice IELTS tests to identify your weak areas</div>
+        <div class="tl-task">Enroll in foundational courses — Python, Statistics basics</div>
+        <div class="tl-task">Review syllabi and entry requirements of your target programs</div>
+        <div class="tl-task">Build a detailed weekly study schedule and stick to it</div>
+      </div>
+
+      <div class="tl-item tl-skills">
+        <div class="tl-period">Month 1 – 3</div>
+        <div class="tl-title">⚡ Skill Development</div>
+        <div class="tl-task">Focus on IELTS writing and speaking — these take longest to improve</div>
+        <div class="tl-task">Complete core courses — Python, SQL, Machine Learning basics</div>
+        <div class="tl-task">Practice with real datasets and build 1-2 small projects</div>
+        <div class="tl-task">Retake IELTS if needed — target score 6.5 or above</div>
+      </div>
+
+      <div class="tl-item tl-advanced">
+        <div class="tl-period">Month 3 – 6</div>
+        <div class="tl-title">🚀 Advanced Topics</div>
+        <div class="tl-task">Deepen knowledge in your specialisation area</div>
+        <div class="tl-task">Complete a capstone project or real-world case study</div>
+        <div class="tl-task">Join online communities — Reddit, Discord, LinkedIn groups</div>
+        <div class="tl-task">Draft your personal statement and motivation letter</div>
+      </div>
+
+      <div class="tl-item tl-apply">
+        <div class="tl-period">Month 6+</div>
+        <div class="tl-title">📬 Application & Submission</div>
+        <div class="tl-task">Submit completed applications before the January 15 deadline</div>
+        <div class="tl-task">Prepare for potential interviews with real project examples</div>
+        <div class="tl-task">Arrange official transcripts, reference letters, and documents</div>
+        <div class="tl-task">Track your application status and respond promptly</div>
+      </div>
+
+    </div>
+    """, unsafe_allow_html=True)
 
     st.markdown("---")
-    st.markdown("### 💡 Pro Tips")
+    st.markdown("### 💡 Pro Tips from Students Who Made It")
+
     tips = [
-        ("Consistency", "Study a little every day rather than cramming"),
-        ("Practice Tests", "Take mock IELTS regularly to track progress"),
-        ("Real Projects", "Apply learning by building actual projects"),
-        ("Community", "Join study groups and connect with other students"),
-        ("Balance", "Take regular breaks to avoid burnout"),
+        ("🎯", "Consistency beats intensity", "Study 1 hour every day rather than 8 hours once a week. Small steps compound."),
+        ("📝", "Mock tests are everything", "Take a full IELTS mock test every 2 weeks. Track your score. Adjust your weak areas."),
+        ("💻", "Build real projects", "A GitHub profile with 2-3 real projects is worth more than any certificate alone."),
+        ("🤝", "Community matters", "Join Facebook groups and Discord servers for international students applying to Denmark."),
+        ("⏸️", "Rest is part of the plan", "Burnout kills momentum. Schedule rest days and protect your mental energy."),
     ]
-    for tip, desc in tips:
-        st.markdown(f"**{tip}** — {desc}")
+
+    c1, c2 = st.columns(2)
+    for i, (icon, title, desc) in enumerate(tips):
+        col = c1 if i % 2 == 0 else c2
+        with col:
+            st.markdown(f"""
+            <div style="background:white;border-radius:14px;padding:1.2rem;margin-bottom:1rem;
+                        border-left:4px solid #7c3aed;box-shadow:0 2px 8px rgba(124,58,237,0.08);">
+                <div style="font-size:1.5rem;margin-bottom:0.3rem">{icon}</div>
+                <div style="font-weight:700;color:#4c1d95;margin-bottom:0.3rem">{title}</div>
+                <div style="color:#6b7a99;font-size:0.88rem">{desc}</div>
+            </div>""", unsafe_allow_html=True)
+
+    st.markdown("---")
+    st.markdown("### 📚 Useful Resources")
+    r1, r2, r3, r4 = st.columns(4)
+    resources = [
+        ("🎓", "IELTS Practice", "ielts.org", "https://www.ielts.org"),
+        ("💻", "Free Courses", "Coursera.org", "https://www.coursera.org"),
+        ("🇩🇰", "Study in Denmark", "studyindenmark.dk", "https://www.studyindenmark.dk"),
+        ("🏫", "CBS Programs", "cbs.dk", "https://www.cbs.dk/en/study/graduate"),
+    ]
+    for col, (icon, label, site, url) in zip([r1,r2,r3,r4], resources):
+        with col:
+            st.markdown(f"""
+            <div style="background:linear-gradient(135deg,#f0fdfa,#ccfbf1);border-radius:14px;
+                        padding:1.2rem;text-align:center;border:1px solid #99f6e4;">
+                <div style="font-size:1.8rem">{icon}</div>
+                <div style="font-weight:700;color:#0f766e;margin:0.3rem 0 0.2rem">{label}</div>
+                <a href="{url}" target="_blank" style="color:#14b8a6;font-size:0.8rem">{site}</a>
+            </div>""", unsafe_allow_html=True)
 
 
 # ===== PAGE 4: SYSTEM STATUS =====
