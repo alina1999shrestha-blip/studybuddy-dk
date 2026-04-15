@@ -1,0 +1,38 @@
+{
+  "gaps": [
+    {
+      "type": "ielts",
+      "area": "English Language",
+      "have": 0.0,
+      "need": 6.5,
+      "missing": 6.5,
+      "priority": "high"
+    }
+  ],
+  "recommendations": [
+    {
+      "gap": {
+        "type": "ielts",
+        "area": "English Language",
+        "have": 0.0,
+        "need": 6.5,
+        "missing": 6.5,
+        "priority": "high"
+      },
+      "courses": [
+        {
+          "id": "ielts_001",
+          "skill": "IELTS",
+          "course_name": "IELTS Academic Preparation",
+          "platform": "Coursera",
+          "provider": "British Council",
+          "duration_weeks": 4,
+          "cost": "Free (audit)",
+          "level": "beginner",
+          "url": "https://www.coursera.org/learn/ielts-preparation",
+          "rating": 4.4
+        }
+      ]
+    }
+  ]
+}

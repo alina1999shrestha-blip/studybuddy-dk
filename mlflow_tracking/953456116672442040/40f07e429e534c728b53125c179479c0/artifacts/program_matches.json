@@ -1,0 +1,71 @@
+[
+  {
+    "program_id": "cbs_finance",
+    "program_name": "MSc Finance",
+    "university": "CBS",
+    "university_full": "Copenhagen Business School",
+    "match_score": 92.5,
+    "eligibility": {
+      "eligible": false,
+      "passed": [
+        "IELTS: 6.5 / 6.5 \u2705"
+      ],
+      "issues": [
+        "ECTS total: 135.0 / 180 \u2014 missing 45.0 ECTS"
+      ],
+      "days_until_deadline": 276,
+      "deadline": "2027-01-15"
+    },
+    "tuition_dkk": 85000,
+    "deadline": "2027-01-15",
+    "location": "Copenhagen",
+    "ielts_min": 6.5,
+    "ects_required": 180
+  },
+  {
+    "program_id": "cbs_accounting",
+    "program_name": "MSc Accounting Strategy and Control",
+    "university": "CBS",
+    "university_full": "Copenhagen Business School",
+    "match_score": 92.5,
+    "eligibility": {
+      "eligible": false,
+      "passed": [
+        "IELTS: 6.5 / 6.5 \u2705"
+      ],
+      "issues": [
+        "ECTS total: 135.0 / 180 \u2014 missing 45.0 ECTS"
+      ],
+      "days_until_deadline": 276,
+      "deadline": "2027-01-15"
+    },
+    "tuition_dkk": 85000,
+    "deadline": "2027-01-15",
+    "location": "Copenhagen",
+    "ielts_min": 6.5,
+    "ects_required": 180
+  },
+  {
+    "program_id": "au_digital_business",
+    "program_name": "MSc Digital Business Management",
+    "university": "AU",
+    "university_full": "Aarhus University",
+    "match_score": 92.5,
+    "eligibility": {
+      "eligible": false,
+      "passed": [
+        "IELTS: 6.5 / 6.5 \u2705"
+      ],
+      "issues": [
+        "ECTS total: 135.0 / 180 \u2014 missing 45.0 ECTS"
+      ],
+      "days_until_deadline": 276,
+      "deadline": "2027-01-15"
+    },
+    "tuition_dkk": 76000,
+    "deadline": "2027-01-15",
+    "location": "Aarhus",
+    "ielts_min": 6.5,
+    "ects_required": 180
+  }
+]

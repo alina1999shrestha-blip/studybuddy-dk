@@ -1,0 +1,71 @@
+[
+  {
+    "program_id": "cbs_bds",
+    "program_name": "MSc Business Administration and Data Science",
+    "university": "CBS",
+    "university_full": "Copenhagen Business School",
+    "match_score": 80.0,
+    "eligibility": {
+      "eligible": false,
+      "passed": [
+        "ECTS total: 195.0 / 180 \u2705"
+      ],
+      "issues": [
+        "IELTS: 0.0 \u2014 minimum required is 6.5"
+      ],
+      "days_until_deadline": 276,
+      "deadline": "2027-01-15"
+    },
+    "tuition_dkk": 85000,
+    "deadline": "2027-01-15",
+    "location": "Copenhagen",
+    "ielts_min": 6.5,
+    "ects_required": 180
+  },
+  {
+    "program_id": "cbs_finance",
+    "program_name": "MSc Finance",
+    "university": "CBS",
+    "university_full": "Copenhagen Business School",
+    "match_score": 80.0,
+    "eligibility": {
+      "eligible": false,
+      "passed": [
+        "ECTS total: 195.0 / 180 \u2705"
+      ],
+      "issues": [
+        "IELTS: 0.0 \u2014 minimum required is 6.5"
+      ],
+      "days_until_deadline": 276,
+      "deadline": "2027-01-15"
+    },
+    "tuition_dkk": 85000,
+    "deadline": "2027-01-15",
+    "location": "Copenhagen",
+    "ielts_min": 6.5,
+    "ects_required": 180
+  },
+  {
+    "program_id": "cbs_accounting",
+    "program_name": "MSc Accounting Strategy and Control",
+    "university": "CBS",
+    "university_full": "Copenhagen Business School",
+    "match_score": 80.0,
+    "eligibility": {
+      "eligible": false,
+      "passed": [
+        "ECTS total: 195.0 / 180 \u2705"
+      ],
+      "issues": [
+        "IELTS: 0.0 \u2014 minimum required is 6.5"
+      ],
+      "days_until_deadline": 276,
+      "deadline": "2027-01-15"
+    },
+    "tuition_dkk": 85000,
+    "deadline": "2027-01-15",
+    "location": "Copenhagen",
+    "ielts_min": 6.5,
+    "ects_required": 180
+  }
+]

@@ -1,0 +1,16 @@
+{
+  "name": "sonam",
+  "degree": "BBA",
+  "major": "",
+  "university": "",
+  "country": "Nepal",
+  "gpa": 0.0,
+  "ielts_score": 0.0,
+  "ects_business": 180.0,
+  "ects_quant": 0.0,
+  "ects_programming": 110.0,
+  "ects_research": 135.0,
+  "target_field": "",
+  "eu_student": false,
+  "ects_total": 425.0
+}

@@ -1,0 +1,94 @@
+{
+  "gaps": [
+    {
+      "type": "skill",
+      "area": "Python",
+      "have": 0,
+      "need": 1,
+      "missing": 1,
+      "priority": "high"
+    },
+    {
+      "type": "skill",
+      "area": "SQL",
+      "have": 0,
+      "need": 1,
+      "missing": 1,
+      "priority": "high"
+    }
+  ],
+  "recommendations": [
+    {
+      "gap": {
+        "type": "skill",
+        "area": "Python",
+        "have": 0,
+        "need": 1,
+        "missing": 1,
+        "priority": "high"
+      },
+      "courses": [
+        {
+          "id": "py_001",
+          "skill": "Python",
+          "course_name": "Python for Everybody Specialization",
+          "platform": "Coursera",
+          "provider": "University of Michigan",
+          "duration_weeks": 8,
+          "cost": "Free (audit)",
+          "level": "beginner",
+          "url": "https://www.coursera.org/specializations/python",
+          "rating": 4.8
+        },
+        {
+          "id": "py_002",
+          "skill": "Python",
+          "course_name": "Complete Python Bootcamp",
+          "platform": "Udemy",
+          "provider": "Jose Portilla",
+          "duration_weeks": 4,
+          "cost": "~150 DKK",
+          "level": "beginner",
+          "url": "https://www.udemy.com/course/complete-python-bootcamp",
+          "rating": 4.7
+        }
+      ]
+    },
+    {
+      "gap": {
+        "type": "skill",
+        "area": "SQL",
+        "have": 0,
+        "need": 1,
+        "missing": 1,
+        "priority": "high"
+      },
+      "courses": [
+        {
+          "id": "sql_001",
+          "skill": "SQL",
+          "course_name": "SQL for Data Science",
+          "platform": "Coursera",
+          "provider": "UC Davis",
+          "duration_weeks": 4,
+          "cost": "Free (audit)",
+          "level": "beginner",
+          "url": "https://www.coursera.org/learn/sql-for-data-science",
+          "rating": 4.6
+        },
+        {
+          "id": "sql_002",
+          "skill": "SQL",
+          "course_name": "The Complete SQL Bootcamp",
+          "platform": "Udemy",
+          "provider": "Jose Portilla",
+          "duration_weeks": 3,
+          "cost": "~150 DKK",
+          "level": "beginner",
+          "url": "https://www.udemy.com/course/the-complete-sql-bootcamp",
+          "rating": 4.7
+        }
+      ]
+    }
+  ]
+}

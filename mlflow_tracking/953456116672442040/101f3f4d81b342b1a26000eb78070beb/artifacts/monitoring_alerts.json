@@ -1,0 +1,17 @@
+[
+  {
+    "type": "requirement_change",
+    "program": "CBS MSc BDS",
+    "field": "IELTS minimum",
+    "old_value": 6.5,
+    "new_value": 21.0,
+    "severity": "high",
+    "message": "CBS IELTS requirement changed from 6.5 to 21.0"
+  },
+  {
+    "type": "scrape_success",
+    "program": "CBS MSc BDS",
+    "message": "CBS page scraped successfully \u2014 no changes detected",
+    "severity": "info"
+  }
+]

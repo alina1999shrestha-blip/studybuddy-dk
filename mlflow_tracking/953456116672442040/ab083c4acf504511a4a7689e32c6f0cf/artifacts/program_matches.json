@@ -1,0 +1,68 @@
+[
+  {
+    "program_id": "cbs_bds",
+    "program_name": "MSc Business Administration and Data Science",
+    "university": "CBS",
+    "university_full": "Copenhagen Business School",
+    "match_score": 79.2,
+    "eligibility": {
+      "eligible": false,
+      "passed": [],
+      "issues": [
+        "ECTS total: 175.0 / 180 \u2014 missing 5.0 ECTS",
+        "IELTS: 0.0 \u2014 minimum required is 6.5"
+      ],
+      "days_until_deadline": 277,
+      "deadline": "2027-01-15"
+    },
+    "tuition_dkk": 85000,
+    "deadline": "2027-01-15",
+    "location": "Copenhagen",
+    "ielts_min": 6.5,
+    "ects_required": 180
+  },
+  {
+    "program_id": "dtu_data_science",
+    "program_name": "MSc Data Science",
+    "university": "DTU",
+    "university_full": "Technical University of Denmark",
+    "match_score": 79.2,
+    "eligibility": {
+      "eligible": false,
+      "passed": [],
+      "issues": [
+        "ECTS total: 175.0 / 180 \u2014 missing 5.0 ECTS",
+        "IELTS: 0.0 \u2014 minimum required is 6.0"
+      ],
+      "days_until_deadline": 277,
+      "deadline": "2027-01-15"
+    },
+    "tuition_dkk": 92000,
+    "deadline": "2027-01-15",
+    "location": "Lyngby",
+    "ielts_min": 6.0,
+    "ects_required": 180
+  },
+  {
+    "program_id": "dtu_ai",
+    "program_name": "MSc Artificial Intelligence and Data",
+    "university": "DTU",
+    "university_full": "Technical University of Denmark",
+    "match_score": 79.2,
+    "eligibility": {
+      "eligible": false,
+      "passed": [],
+      "issues": [
+        "ECTS total: 175.0 / 180 \u2014 missing 5.0 ECTS",
+        "IELTS: 0.0 \u2014 minimum required is 6.0"
+      ],
+      "days_until_deadline": 277,
+      "deadline": "2027-01-15"
+    },
+    "tuition_dkk": 92000,
+    "deadline": "2027-01-15",
+    "location": "Lyngby",
+    "ielts_min": 6.0,
+    "ects_required": 180
+  }
+]
