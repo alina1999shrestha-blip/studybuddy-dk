@@ -1,9 +1,10 @@
 # 🎓 StudyBuddy DK
 ### AI-Powered Danish Master's Program Finder
 **MSc BDS — Data Engineering and Machine Learning Operations in Business**  
-**Student:** Alina Shrestha | **Submitted:** April 2026
-**Live Demo:** https://studybuddy-dk.streamlit.app
+**Student:** Alina Shrestha | **Submitted:** April 2026  
+**Live Demo:** https://studybuddy-dk.streamlit.app  
 **GitHub:** https://github.com/alina1999shrestha-blip/studybuddy-dk
+
 ---
 
 ## 📌 What is this project?
@@ -17,6 +18,20 @@ StudyBuddy DK is an end-to-end MLOps pipeline that helps international students 
 - **Monitoring alerts** for data drift and requirement changes
 
 Everything is tracked in MLflow for full reproducibility.
+
+---
+
+## 🎯 Aim of the Project
+
+The objective is to build a production-ready MLOps pipeline that includes:
+
+- 📥 Data ingestion — static datasets + live exchange rate fetching
+- 🧹 Preprocessing — profile building, ECTS parsing, eligibility filtering
+- 🧬 Feature representation — cosine similarity matching over program embeddings
+- 🤖 Multi-agent inference — matching, gap analysis, and monitoring agents
+- 🌐 API-based deployment — FastAPI with full REST interface
+- 🐳 Containerisation — Docker + Docker Compose
+- 🔁 Continuous execution — GitHub Actions daily scheduler + MLflow tracking
 
 ---
 
@@ -83,6 +98,43 @@ flowchart TD
 | Tracking | MLflow — logs every run with parameters, metrics and artifacts |
 | Scheduling | GitHub Actions — daily exchange rate fetch |
 | Container | Docker + Docker Compose |
+
+---
+
+## ⚙️ Pipeline Components
+
+### 📥 Data Ingestion
+- Static program and course data loaded from JSON
+- Live exchange rates fetched daily via GitHub Actions
+- CBS program pages scraped on startup for requirement monitoring
+
+### 🧹 Preprocessing
+- Student profile construction from ECTS inputs
+- Null filtering and ECTS normalisation
+- Eligibility pre-screening before matching
+
+### 🤖 Agent Layer
+
+**Agent 1 — Profile Matching**
+- Cosine similarity over student vs. program feature vectors
+- Returns top 3 programs with eligibility status and match scores
+
+**Agent 2 — Gap & Cost Analysis**
+- ECTS diff calculation per domain
+- Course recommendations from `courses.json`
+- Live DKK cost conversion (NPR / INR / USD)
+- Automatic deadline countdown
+
+**Agent 3 — Monitoring**
+- Exchange rate drift detection
+- CBS requirements change detection via scraping
+- Alerts logged to database and MLflow
+
+### 🌐 API Deployment
+Deployed using **FastAPI** — see endpoints below.
+
+### 🐳 Containerisation
+The entire system runs via Docker Compose — one command starts the API, frontend, and all dependencies.
 
 ---
 
@@ -262,6 +314,40 @@ docker-compose up --build --force-recreate
 Services started:
 - `studybuddy-api` → FastAPI on port 8000
 - `studybuddy-frontend` → Streamlit on port 8501
+
+---
+
+## 🔮 Future Work
+
+**Application Support**
+- 📋 Generate a per-programme document checklist (motivation letter, transcripts, references) so students know exactly what to submit after matching
+- 🗓️ Show visa application deadline alongside programme deadline — Danish student visas take 2–3 months to process
+
+**Data & Coverage**
+- 🔄 Extend live scraping to all 6 universities — currently only CBS is scraped automatically
+- 📚 Expand from 17 to more programmes, including part-time and online options
+
+**Costs & Financial Planning**
+- 🏠 Add monthly living cost estimates per city — rent in Copenhagen vs Aalborg differs significantly
+- 🎓 Surface available scholarships for the student's nationality alongside tuition costs
+
+**Matching**
+- 🎯 Weight ECTS dimensions per programme — not all subjects matter equally for every programme
+- 📊 Show acceptance likelihood, not just match score
+
+**Monitoring**
+- 🔁 Extend requirement change detection to all 6 universities — currently CBS only
+
+---
+
+## ✅ Key Takeaways
+
+- Focus on **MLOps**, not model perfection
+- Demonstrates a **3-agent end-to-end pipeline** with real data
+- **Fully containerised** and deployable with one command
+- Supports **real-time interaction** via API and Streamlit
+- **Automated daily scheduling** via GitHub Actions
+- **Every run is tracked** with parameters, metrics and artifacts in MLflow
 
 ---
 
