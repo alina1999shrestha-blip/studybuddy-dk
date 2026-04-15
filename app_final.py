@@ -346,12 +346,6 @@ html, body, [class*="css"] {
 
 
 # ===== HELPERS =====
-def api_ok():
-    try:
-        return requests.get(f"{API_URL}/health", timeout=4).status_code == 200
-    except:
-        return False
-
 def score_color(score):
     if score >= 85: return "#22c55e"
     if score >= 70: return "#f59e0b"
