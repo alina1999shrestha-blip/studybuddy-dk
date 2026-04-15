@@ -2,7 +2,8 @@
 ### AI-Powered Danish Master's Program Finder
 **MSc BDS — Data Engineering and Machine Learning Operations in Business**  
 **Student:** Alina Shrestha | **Submitted:** April 2026
-
+**Live Demo:** https://studybuddy-dk.streamlit.app
+**GitHub:** https://github.com/alina1999shrestha-blip/studybuddy-dk
 ---
 
 ## 📌 What is this project?
