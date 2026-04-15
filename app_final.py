@@ -657,26 +657,46 @@ elif page == "⚙️ System Status":
 
     st.markdown("---")
     st.markdown("### 🔄 Recent Pipeline Runs")
+    runs = []
     try:
         runs = requests.get(f"{API_URL}/pipeline-runs", timeout=10).json().get("runs",[])
-        if runs: st.dataframe(pd.DataFrame(runs), use_container_width=True)
-        else: st.info("No pipeline runs yet — click 'Analyse My Profile' to create one.")
-    except Exception as e:
-        st.error(str(e))
+    except:
+        pass
+    if not runs and PIPELINE_DIRECT:
+        try:
+            conn = get_connection(); cursor = conn.cursor()
+            cursor.execute("SELECT * FROM pipeline_runs ORDER BY created_at DESC LIMIT 20")
+            columns = [d[0] for d in cursor.description]
+            runs = [dict(zip(columns,row)) for row in cursor.fetchall()]
+            conn.close()
+        except:
+            pass
+    if runs: st.dataframe(pd.DataFrame(runs), use_container_width=True)
+    else: st.info("No pipeline runs yet — click 'Analyse My Profile' to create one.")
 
     st.markdown("### 🚨 Monitoring Alerts")
+    alerts = []
     try:
         alerts = requests.get(f"{API_URL}/monitoring-alerts", timeout=10).json().get("alerts",[])
-        if not alerts:
-            st.markdown('<div class="alert-ok">✅ No alerts — all data is stable</div>', unsafe_allow_html=True)
-        else:
-            for a in alerts[:5]:
-                sev  = a.get("severity","").upper()
-                cls  = "alert-high" if sev=="HIGH" else ("alert-medium" if sev=="MEDIUM" else "alert-ok")
-                icon = "🔴" if sev=="HIGH" else ("🟡" if sev=="MEDIUM" else "🟢")
-                st.markdown(f'<div class="{cls}">{icon} <b>{a.get("alert_type","")}</b> — {a.get("message","")}</div>', unsafe_allow_html=True)
-    except Exception as e:
-        st.error(str(e))
+    except:
+        pass
+    if not alerts and PIPELINE_DIRECT:
+        try:
+            conn = get_connection(); cursor = conn.cursor()
+            cursor.execute("SELECT * FROM monitoring_alerts ORDER BY timestamp DESC LIMIT 10")
+            columns = [d[0] for d in cursor.description]
+            alerts = [dict(zip(columns,row)) for row in cursor.fetchall()]
+            conn.close()
+        except:
+            pass
+    if not alerts:
+        st.markdown('<div class="alert-ok">✅ No alerts — all data is stable</div>', unsafe_allow_html=True)
+    else:
+        for a in alerts[:5]:
+            sev  = a.get("severity","").upper()
+            cls  = "alert-high" if sev=="HIGH" else ("alert-medium" if sev=="MEDIUM" else "alert-ok")
+            icon = "🔴" if sev=="HIGH" else ("🟡" if sev=="MEDIUM" else "🟢")
+            st.markdown(f'<div class="{cls}">{icon} <b>{a.get("alert_type","")}</b> — {a.get("message","")}</div>', unsafe_allow_html=True)
 
 
 # ===== FOOTER =====
