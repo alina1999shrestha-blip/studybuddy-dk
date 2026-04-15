@@ -915,16 +915,16 @@ elif page == "📊 Program Explorer":
         else:
             resp = requests.get(f"{API_URL}/programs", timeout=10)
             programs = resp.json().get("programs", []) if resp.status_code == 200 else []
-            if programs:
-                df = pd.DataFrame(programs)
-                unis = st.multiselect("Filter by University", df["university"].unique().tolist(),
-                                      default=df["university"].unique().tolist())
-                filtered = df[df["university"].isin(unis)]
-                display_cols = [c for c in ["name","university","ects_required","ielts_min","tuition_non_eu_dkk"] if c in filtered.columns]
-                st.dataframe(filtered[display_cols], use_container_width=True)
-                st.caption(f"{len(filtered)} programs shown")
+        if programs:
+            df = pd.DataFrame(programs)
+            unis = st.multiselect("Filter by University", df["university"].unique().tolist(),
+                                  default=df["university"].unique().tolist())
+            filtered = df[df["university"].isin(unis)]
+            display_cols = [c for c in ["name","university","ects_required","ielts_min","tuition_non_eu_dkk"] if c in filtered.columns]
+            st.dataframe(filtered[display_cols], use_container_width=True)
+            st.caption(f"{len(filtered)} programs shown")
         else:
-            st.error("Could not fetch programs from API")
+            st.warning("No programs found")
     except Exception as e:
         st.error(f"Error: {e}")
 
