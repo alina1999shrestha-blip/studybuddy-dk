@@ -585,34 +585,55 @@ elif page == "⚙️ System Status":
 
     st.markdown("---")
     st.markdown("### 💱 Live Exchange Rates (fetched daily)")
+
+    # Try API first, fall back to database directly (for Streamlit Cloud)
+    rates = {}
+    rate_source = "API"
     try:
         rates_resp = requests.get(f"{API_URL}/exchange-rates", timeout=8)
         if rates_resp.status_code == 200:
-            rates     = rates_resp.json().get("latest_rates",{})
-            rate_date = rates.get("date","today")
-            st.caption(f"Last updated: **{rate_date}** · Source: frankfurter.app + open.er-api.com · Updated daily via GitHub Actions")
-            r1,r2,r3,r4,r5 = st.columns(5)
-            for col,(label,key) in zip([r1,r2,r3,r4,r5],[("🇳🇵 NPR","dkk_to_npr"),("🇮🇳 INR","dkk_to_inr"),("🇺🇸 USD","dkk_to_usd"),("🇪🇺 EUR","dkk_to_eur"),("🇬🇧 GBP","dkk_to_gbp")]):
-                val = rates.get(key,0)
-                with col:
-                    st.markdown(f'<div class="stat-box"><div class="stat-value" style="font-size:1.4rem">{val:.4f}</div><div class="stat-label">{label}</div><div style="font-size:0.7rem;color:#9ca3af;margin-top:4px">1 DKK =</div></div>', unsafe_allow_html=True)
+            rates = rates_resp.json().get("latest_rates", {})
+            rate_source = "API"
+    except:
+        pass
 
-            # ── FIXED: colour classes on example cost cards ──
-            st.markdown("<br>**Example: MSc Finance @ CBS (85,000 DKK/year)**", unsafe_allow_html=True)
-            ex1,ex2,ex3 = st.columns(3)
-            npr_val = rates.get("dkk_to_npr",0)
-            inr_val = rates.get("dkk_to_inr",0)
-            usd_val = rates.get("dkk_to_usd",0)
-            with ex1:
-                st.markdown(f'<div class="cost-card cost-card-npr"><div class="currency">🇳🇵 Nepali Rupee</div><div class="amount">{int(85000*npr_val):,}</div><div class="per-year">NPR / year</div></div>', unsafe_allow_html=True)
-            with ex2:
-                st.markdown(f'<div class="cost-card cost-card-inr"><div class="currency">🇮🇳 Indian Rupee</div><div class="amount">{int(85000*inr_val):,}</div><div class="per-year">INR / year</div></div>', unsafe_allow_html=True)
-            with ex3:
-                st.markdown(f'<div class="cost-card cost-card-usd"><div class="currency">🇺🇸 US Dollar</div><div class="amount">{int(85000*usd_val):,}</div><div class="per-year">USD / year</div></div>', unsafe_allow_html=True)
-        else:
-            st.warning("Exchange rates not available — run `python pipeline.py` first to fetch rates.")
-    except Exception as e:
-        st.error(f"Could not fetch rates: {e}")
+    # Fallback: read directly from database when API is offline
+    if not rates and PIPELINE_DIRECT:
+        try:
+            conn = get_connection()
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM exchange_rates ORDER BY date DESC LIMIT 1")
+            columns = [d[0] for d in cursor.description]
+            row = cursor.fetchone()
+            conn.close()
+            if row:
+                rates = dict(zip(columns, row))
+                rate_source = "Database"
+        except:
+            pass
+
+    if rates:
+        rate_date = rates.get("date", "today")
+        st.caption(f"Last updated: **{rate_date}** · Source: frankfurter.app + open.er-api.com · Updated daily via GitHub Actions · _{rate_source}_")
+        r1,r2,r3,r4,r5 = st.columns(5)
+        for col,(label,key) in zip([r1,r2,r3,r4,r5],[("🇳🇵 NPR","dkk_to_npr"),("🇮🇳 INR","dkk_to_inr"),("🇺🇸 USD","dkk_to_usd"),("🇪🇺 EUR","dkk_to_eur"),("🇬🇧 GBP","dkk_to_gbp")]):
+            val = rates.get(key, 0)
+            with col:
+                st.markdown(f'<div class="stat-box"><div class="stat-value" style="font-size:1.4rem">{val:.4f}</div><div class="stat-label">{label}</div><div style="font-size:0.7rem;color:#9ca3af;margin-top:4px">1 DKK =</div></div>', unsafe_allow_html=True)
+
+        st.markdown("<br>**Example: MSc Finance @ CBS (85,000 DKK/year)**", unsafe_allow_html=True)
+        ex1,ex2,ex3 = st.columns(3)
+        npr_val = rates.get("dkk_to_npr", 0)
+        inr_val = rates.get("dkk_to_inr", 0)
+        usd_val = rates.get("dkk_to_usd", 0)
+        with ex1:
+            st.markdown(f'<div class="cost-card cost-card-npr"><div class="currency">🇳🇵 Nepali Rupee</div><div class="amount">{int(85000*npr_val):,}</div><div class="per-year">NPR / year</div></div>', unsafe_allow_html=True)
+        with ex2:
+            st.markdown(f'<div class="cost-card cost-card-inr"><div class="currency">🇮🇳 Indian Rupee</div><div class="amount">{int(85000*inr_val):,}</div><div class="per-year">INR / year</div></div>', unsafe_allow_html=True)
+        with ex3:
+            st.markdown(f'<div class="cost-card cost-card-usd"><div class="currency">🇺🇸 US Dollar</div><div class="amount">{int(85000*usd_val):,}</div><div class="per-year">USD / year</div></div>', unsafe_allow_html=True)
+    else:
+        st.warning("Exchange rates not available — run `python pipeline.py` first to fetch rates.")
 
     st.markdown("---")
     st.markdown("### ⏳ Application Deadline Countdown")
