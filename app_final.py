@@ -345,6 +345,7 @@ Respond ONLY with valid JSON:
                         result = resp.json()
 
                     st.success("✅ Analysis complete!")
+                    st.session_state["result"] = result
                     top_programs    = result.get("top_programs",[])
                     gaps            = result.get("gaps",[])
                     recommendations = result.get("recommendations",[])
@@ -360,7 +361,7 @@ Respond ONLY with valid JSON:
                     cost_val  = costs.get("tuition_dkk",0)
                     for col,val,lbl in [(s1,f"{top_score:.0f}%","Top Match Score"),(s2,len(gaps),"Skill Gaps Found"),(s3,f"{int(cost_val):,}","DKK / Year"),(s4,days,"Days to Deadline")]:
                         with col:
-                            st.markdown(f'<div class="stat-box"><div class="stat-value">{val}</div><div class="stat-label">{lbl}</div></div>', unsafe_allow_html=True)
+                                st.markdown(f'<div class="stat-box"><div class="stat-value">{val}</div><div class="stat-label">{lbl}</div></div>', unsafe_allow_html=True)
 
                     st.markdown("<br>", unsafe_allow_html=True)
                     t1,t2,t3,t4,t5 = st.tabs(["🏆 Top Matches","🎯 Gap Analysis","💰 Costs","📅 Deadlines","📈 Monitoring"])
@@ -461,29 +462,29 @@ Respond ONLY with valid JSON:
                                 cls  = "alert-high" if sev=="HIGH" else ("alert-medium" if sev=="MEDIUM" else "alert-ok")
                                 icon = "🔴" if sev=="HIGH" else ("🟡" if sev=="MEDIUM" else "🟢")
                                 st.markdown(f'<div class="{cls}">{icon} {msg}</div>', unsafe_allow_html=True)
-# ── User Feedback ──────────────────────────────
-                    st.markdown("---")
-                    st.markdown("#### Was this recommendation helpful?")
-                    with st.form("feedback_form"):
-                        feedback_comment = st.text_input("Any comments? (optional)")
-                        col1, col2 = st.columns(2)
-                        with col1:
-                            positive = st.form_submit_button("👍 Yes, helpful", use_container_width=True)
-                        with col2:
-                            negative = st.form_submit_button("👎 Not helpful", use_container_width=True)
-                        if positive:
-                            from database import save_feedback
-                            save_feedback("positive", feedback_comment)
-                            st.success("Thank you for your feedback!")
-                        if negative:
-                            from database import save_feedback
-                            save_feedback("negative", feedback_comment)
-                            st.info("Thanks — we will use this to improve.")
+    
                 except requests.exceptions.RequestException as e:
                     st.error(f"Connection error: {e}")
                 except Exception as e:
                     st.error(f"Error: {e}")
-
+if "result" in st.session_state:
+            st.markdown("---")
+            st.markdown("#### Was this recommendation helpful?")
+            with st.form("feedback_form"):
+                feedback_comment = st.text_input("Any comments? (optional)")
+                col1, col2 = st.columns(2)
+                with col1:
+                    positive = st.form_submit_button("👍 Yes, helpful", use_container_width=True)
+                with col2:
+                    negative = st.form_submit_button("👎 Not helpful", use_container_width=True)
+                if positive:
+                    from database import save_feedback
+                    save_feedback("positive", feedback_comment)
+                    st.success("Thank you for your feedback!")
+                if negative:
+                    from database import save_feedback
+                    save_feedback("negative", feedback_comment)
+                    st.info("Thanks — we will use this to improve.")
 
 # ===== PAGE 2: PROGRAM EXPLORER =====
 elif page == "📊 Program Explorer":
