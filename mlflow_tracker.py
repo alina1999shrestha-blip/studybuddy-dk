@@ -46,27 +46,28 @@ def log_pipeline_run_mlflow(student_input: dict, results: dict):
             mlflow.log_metric("monitoring_alerts",
                 len(results["monitoring"]["alerts"]))
             mlflow.log_metric("pipeline_duration_s",results["run_duration_s"])
-            # User feedback count
-try:
-    import sqlite3
-    conn = sqlite3.connect('studybuddy.db')
-    count = conn.execute("SELECT COUNT(*) FROM user_feedback").fetchone()[0]
-    conn.close()
-    mlflow.log_metric("user_feedback_total", count)
-    # Save feedback as artifact
-try:
-    import sqlite3, json
-    conn = sqlite3.connect('studybuddy.db')
-    rows = conn.execute("SELECT * FROM user_feedback").fetchall()
-    conn.close()
-    feedback_list = [{"id": r[0], "rating": r[1], "comment": r[2], "created_at": r[3]} for r in rows]
-    with open("mlflow_artifacts/user_feedback.json", "w") as f:
-        json.dump(feedback_list, f, indent=2)
-    mlflow.log_artifact("mlflow_artifacts/user_feedback.json")
-except:
-    pass    
-except:
-    pass
+  # User feedback count
+            try:
+                import sqlite3
+                conn = sqlite3.connect('studybuddy.db')
+                count = conn.execute("SELECT COUNT(*) FROM user_feedback").fetchone()[0]
+                conn.close()
+                mlflow.log_metric("user_feedback_total", count)
+            except:
+                pass
+
+            # Save feedback as artifact
+            try:
+                import sqlite3, json
+                conn = sqlite3.connect('studybuddy.db')
+                rows = conn.execute("SELECT * FROM user_feedback").fetchall()
+                conn.close()
+                feedback_list = [{"id": r[0], "rating": r[1], "comment": r[2], "created_at": r[3]} for r in rows]
+                with open("mlflow_artifacts/user_feedback.json", "w") as f:
+                    json.dump(feedback_list, f, indent=2)
+                mlflow.log_artifact("mlflow_artifacts/user_feedback.json")
+            except:
+                pass
 
             # ── Tags ──────────────────────────────────────────────────────
             mlflow.set_tag("top_program",   top["program_name"])
