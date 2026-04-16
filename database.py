@@ -74,11 +74,21 @@ def init_database():
 
     # MLflow-style run log table
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS pipeline_runs (
+            CREATE TABLE IF NOT EXISTS pipeline_runs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                run_type TEXT,
+                status TEXT,
+                details TEXT,
+                created_at TEXT
+            )
+        """)
+
+    # User feedback table
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS user_feedback (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            run_type TEXT,
-            status TEXT,
-            details TEXT,
+            rating TEXT,
+            comment TEXT,
             created_at TEXT
         )
     """)
@@ -87,12 +97,12 @@ def init_database():
     conn.close()
     print("✅ Database tables created")
 
-def load_programs_to_db():
-    with open("data/static/programs.json", "r") as f:
-        programs = json.load(f)
+    def load_programs_to_db():
+        with open("data/static/programs.json", "r") as f:
+            programs = json.load(f)
 
-    conn = get_connection()
-    cursor = conn.cursor()
+        conn = get_connection()
+        cursor = conn.cursor()
 
     count = 0
     for p in programs:

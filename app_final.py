@@ -712,7 +712,20 @@ elif page == "⚙️ System Status":
             icon = "🔴" if sev=="HIGH" else ("🟡" if sev=="MEDIUM" else "🟢")
             st.markdown(f'<div class="{cls}">{icon} <b>{a.get("alert_type","")}</b> — {a.get("message","")}</div>', unsafe_allow_html=True)
 
-
+    st.markdown("### 💬 User Feedback")
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM user_feedback ORDER BY created_at DESC LIMIT 10")
+        columns = [d[0] for d in cursor.description]
+        feedback = [dict(zip(columns, row)) for row in cursor.fetchall()]
+        conn.close()
+        if feedback:
+            st.dataframe(pd.DataFrame(feedback), use_container_width=True)
+        else:
+            st.info("No feedback yet.")
+    except:
+        st.info("No feedback yet.")
 # ===== FOOTER =====
 st.markdown("---")
 st.markdown("<p style='text-align:center;color:#9ca3af;font-size:0.8rem;'>StudyBuddy DK © 2026 · MLOps Assignment · Alina Shrestha · API: <code>127.0.0.1:8000</code> · Docs: <code>127.0.0.1:8000/docs</code></p>", unsafe_allow_html=True)
