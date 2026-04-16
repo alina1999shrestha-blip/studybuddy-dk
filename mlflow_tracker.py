@@ -53,6 +53,18 @@ try:
     count = conn.execute("SELECT COUNT(*) FROM user_feedback").fetchone()[0]
     conn.close()
     mlflow.log_metric("user_feedback_total", count)
+    # Save feedback as artifact
+try:
+    import sqlite3, json
+    conn = sqlite3.connect('studybuddy.db')
+    rows = conn.execute("SELECT * FROM user_feedback").fetchall()
+    conn.close()
+    feedback_list = [{"id": r[0], "rating": r[1], "comment": r[2], "created_at": r[3]} for r in rows]
+    with open("mlflow_artifacts/user_feedback.json", "w") as f:
+        json.dump(feedback_list, f, indent=2)
+    mlflow.log_artifact("mlflow_artifacts/user_feedback.json")
+except:
+    pass    
 except:
     pass
 
