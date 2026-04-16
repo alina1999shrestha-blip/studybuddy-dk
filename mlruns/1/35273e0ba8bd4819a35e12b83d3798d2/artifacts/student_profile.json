@@ -1,0 +1,16 @@
+{
+  "name": "Alina",
+  "degree": "BBA Finance",
+  "major": "Finance",
+  "university": "Kathmandu University",
+  "country": "Nepal",
+  "gpa": 3.7,
+  "ielts_score": 6.5,
+  "ects_business": 90.0,
+  "ects_quant": 30.0,
+  "ects_programming": 0.0,
+  "ects_research": 15.0,
+  "target_field": "Business Data Science",
+  "eu_student": false,
+  "ects_total": 135.0
+}
