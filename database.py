@@ -97,12 +97,12 @@ def init_database():
     conn.close()
     print("✅ Database tables created")
 
-    def load_programs_to_db():
-        with open("data/static/programs.json", "r") as f:
-            programs = json.load(f)
+def load_programs_to_db():
+    with open("data/static/programs.json", "r") as f:
+        programs = json.load(f)
 
-        conn = get_connection()
-        cursor = conn.cursor()
+    conn = get_connection()
+    cursor = conn.cursor()
 
     count = 0
     for p in programs:
@@ -126,7 +126,7 @@ def init_database():
     conn.commit()
     conn.close()
     print(f"✅ {count} programs saved to database")
-
+    
 def load_courses_to_db():
     with open("data/static/courses.json", "r") as f:
         courses = json.load(f)

@@ -464,15 +464,18 @@ Respond ONLY with valid JSON:
 # ── User Feedback ──────────────────────────────
                     st.markdown("---")
                     st.markdown("#### Was this recommendation helpful?")
-                    feedback_comment = st.text_input("Any comments? (optional)", key="feedback_comment")
-                    fb1, fb2 = st.columns(2)
-                    with fb1:
-                        if st.button("👍 Yes, helpful", use_container_width=True):
+                    with st.form("feedback_form"):
+                        feedback_comment = st.text_input("Any comments? (optional)")
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            positive = st.form_submit_button("👍 Yes, helpful", use_container_width=True)
+                        with col2:
+                            negative = st.form_submit_button("👎 Not helpful", use_container_width=True)
+                        if positive:
                             from database import save_feedback
                             save_feedback("positive", feedback_comment)
                             st.success("Thank you for your feedback!")
-                    with fb2:
-                        if st.button("👎 Not helpful", use_container_width=True):
+                        if negative:
                             from database import save_feedback
                             save_feedback("negative", feedback_comment)
                             st.info("Thanks — we will use this to improve.")
