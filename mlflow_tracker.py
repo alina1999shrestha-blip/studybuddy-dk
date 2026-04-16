@@ -46,6 +46,15 @@ def log_pipeline_run_mlflow(student_input: dict, results: dict):
             mlflow.log_metric("monitoring_alerts",
                 len(results["monitoring"]["alerts"]))
             mlflow.log_metric("pipeline_duration_s",results["run_duration_s"])
+            # User feedback count
+try:
+    import sqlite3
+    conn = sqlite3.connect('studybuddy.db')
+    count = conn.execute("SELECT COUNT(*) FROM user_feedback").fetchone()[0]
+    conn.close()
+    mlflow.log_metric("user_feedback_total", count)
+except:
+    pass
 
             # ── Tags ──────────────────────────────────────────────────────
             mlflow.set_tag("top_program",   top["program_name"])

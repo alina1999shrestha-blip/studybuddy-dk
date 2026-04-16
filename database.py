@@ -200,6 +200,24 @@ def get_latest_exchange_rate():
     conn.close()
     return dict(row) if row else None
 
+def save_feedback(rating: str, comment: str = ""):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS user_feedback (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            rating TEXT,
+            comment TEXT,
+            created_at TEXT
+        )
+    """)
+    cursor.execute(
+        "INSERT INTO user_feedback (rating, comment, created_at) VALUES (?, ?, ?)",
+        (rating, comment, datetime.utcnow().isoformat())
+    )
+    conn.commit()
+    conn.close() 
+
 if __name__ == "__main__":
     print("=" * 50)
     print("  STUDYBUDDY DK — DATABASE SETUP")

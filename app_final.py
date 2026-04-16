@@ -461,7 +461,21 @@ Respond ONLY with valid JSON:
                                 cls  = "alert-high" if sev=="HIGH" else ("alert-medium" if sev=="MEDIUM" else "alert-ok")
                                 icon = "🔴" if sev=="HIGH" else ("🟡" if sev=="MEDIUM" else "🟢")
                                 st.markdown(f'<div class="{cls}">{icon} {msg}</div>', unsafe_allow_html=True)
-
+# ── User Feedback ──────────────────────────────
+                    st.markdown("---")
+                    st.markdown("#### Was this recommendation helpful?")
+                    feedback_comment = st.text_input("Any comments? (optional)", key="feedback_comment")
+                    fb1, fb2 = st.columns(2)
+                    with fb1:
+                        if st.button("👍 Yes, helpful", use_container_width=True):
+                            from database import save_feedback
+                            save_feedback("positive", feedback_comment)
+                            st.success("Thank you for your feedback!")
+                    with fb2:
+                        if st.button("👎 Not helpful", use_container_width=True):
+                            from database import save_feedback
+                            save_feedback("negative", feedback_comment)
+                            st.info("Thanks — we will use this to improve.")
                 except requests.exceptions.RequestException as e:
                     st.error(f"Connection error: {e}")
                 except Exception as e:
