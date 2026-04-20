@@ -68,4 +68,4 @@ jobs:
           git pull --rebase origin main
           git add studybuddy.db
           git diff --staged --quiet || git commit -m "Auto: daily exchange rates update"
-          git push
+          git push --force-with-lease
