@@ -1,20 +1,23 @@
 name: Daily Exchange Rates
-
 on:
   schedule:
     - cron: '0 8 * * *'  # runs every day at 08:00 UTC
   workflow_dispatch:       # allows manual trigger from GitHub
 
+permissions:
+  contents: write
+
 jobs:
   fetch-rates:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python 3.11
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
@@ -29,11 +32,9 @@ jobs:
           python -c "
           import requests, sqlite3, json
           from datetime import datetime
-
           r1 = requests.get('https://api.frankfurter.app/latest?from=DKK&to=INR,USD,EUR,GBP').json()
           r2 = requests.get('https://open.er-api.com/v6/latest/DKK').json()
           r3 = requests.get('https://open.er-api.com/v6/latest/EUR').json()
-
           conn = sqlite3.connect('studybuddy.db')
           cursor = conn.cursor()
           cursor.execute('''
